@@ -15,6 +15,4 @@ Features:
 
 Depends on:
 * Gorilla mux router and sessions
-=======
-HTTP services routing abstraction layer
 
