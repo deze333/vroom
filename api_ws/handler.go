@@ -3,6 +3,7 @@ package api_ws
 import (
     "fmt"
     "net/http"
+    "time"
 	"github.com/gorilla/websocket"
     "github.com/deze333/vroom/errors"
     "github.com/deze333/vroom/util"
@@ -21,8 +22,17 @@ func Handle_NotAuthd(w http.ResponseWriter, r *http.Request) {
 // Creates WS connecttion and processes it in forever loop.
 func Handle(w http.ResponseWriter, r *http.Request, router *Router, isAuthd bool) {
 
+    var upgrader = websocket.Upgrader{
+        ReadBufferSize:  1024,
+        WriteBufferSize: 1024,
+        CheckOrigin: func(r *http.Request) bool {
+            fmt.Println("Check WebSocket origin: %v\n", r)
+            return true
+        },
+    } 
+
     // Open websocket connection
-    conn, err := websocket.Upgrade(w, r, nil, 1024, 1024)
+    conn, err := upgrader.Upgrade(w, r, nil)
 
     // Process error
     if _, ok := err.(websocket.HandshakeError); ok {
@@ -34,6 +44,17 @@ func Handle(w http.ResponseWriter, r *http.Request, router *Router, isAuthd bool
         return
     }
 
+    // Zero time means unlimited connection
+    err = conn.SetReadDeadline(time.Time{})
+    if err != nil {
+        _onPanic(
+            fmt.Sprintf("Error setting WS deadline: %v", err),
+            fmt.Sprintf("%v : %v", r.Host, r.URL),
+            "","")
+        return
+    }
+
+    // Create connection object
     ws := &Conn{
         isAuthd: isAuthd,
         router: router,
@@ -81,7 +102,7 @@ func procIncoming(w http.ResponseWriter, r *http.Request, ws *Conn) {
         // Read message
         msgType, msg, err = ws.conn.ReadMessage()
         if err != nil {
-            fmt.Printf("---? WebSocket %p error: %v\n", ws.conn, err)
+            fmt.Printf("---Z WebSocket %p error: %v\n", ws.conn, err)
             break 
         }
 
