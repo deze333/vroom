@@ -82,7 +82,8 @@ func procIncoming(w http.ResponseWriter, r *http.Request, ws *Conn) {
         msgType, msg, err = ws.conn.ReadMessage()
         if err != nil {
             fmt.Printf("---? WebSocket %p error: %v\n", ws.conn, err)
-            break
+            continue
+            //break // XXX ???
         }
 
         switch msgType {
