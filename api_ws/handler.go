@@ -81,6 +81,7 @@ func procIncoming(w http.ResponseWriter, r *http.Request, ws *Conn) {
         // Read message
         msgType, msg, err = ws.conn.ReadMessage()
         if err != nil {
+            fmt.Printf("---? WebSocket %p error: %v\n", ws.conn, err)
             break
         }
 
@@ -92,16 +93,20 @@ func procIncoming(w http.ResponseWriter, r *http.Request, ws *Conn) {
 
         // Binary not supported, bye
         case websocket.BinaryMessage:
-            break
+            fmt.Printf("---> WebSocket %p binary msg\n", ws.conn)
 
         case websocket.CloseMessage:
+            fmt.Printf("---> WebSocket %p CLOSE msg\n", ws.conn)
             break
 
         case websocket.PingMessage:
+            fmt.Printf("---> WebSocket %p ping msg\n", ws.conn)
 
         case websocket.PongMessage:
+            fmt.Printf("---> WebSocket %p pong msg\n", ws.conn)
 
         default:
+            fmt.Printf("---> WebSocket %p other msg: %v\n", ws.conn, msgType)
         }
     }
 
