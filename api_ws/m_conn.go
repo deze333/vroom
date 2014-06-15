@@ -1,6 +1,7 @@
 package api_ws
 
 import (
+    "net/http"
 	"github.com/gorilla/websocket"
 )
 
@@ -14,12 +15,14 @@ type Router struct {
 }
 
 type Conn struct {
+    r         *http.Request
+	conn      *websocket.Conn
+
     router    *Router
 
 	id        int64
 	isAuthd   bool
 	isOpen    bool
-	conn      *websocket.Conn
 	chanClose chan int
 	chanSend  chan *Broadcast
 }

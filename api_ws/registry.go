@@ -2,8 +2,8 @@ package api_ws
 
 import (
     "fmt"
+    "bytes"
     "net/http"
-    "sync/atomic"
     "github.com/deze333/vroom/auth"
 )
 
@@ -11,53 +11,113 @@ import (
 // Registry of active WebSocket connections
 //------------------------------------------------------------
 
+/*
 var _openConns_Authd = map[int64]*Conn{}
 var _openConns_Public = map[int64]*Conn{}
 var _publicConnId int64 = 0
+*/
+
+var _connsPublic = map[*http.Request]*Conn{}
+var _connsAuthd = map[int64]map[*http.Request]*Conn{}
 
 //------------------------------------------------------------
 // Functions
 //------------------------------------------------------------
 
-// Registers connection based on session ID.
-func RegisterConn(w http.ResponseWriter, r  *http.Request, ws *Conn) {
+// Registers open connection based on session ID.
+func RegisterConn(ws *Conn) {
 
     if ws.isAuthd {
+
         // Authenticated connection
-        id := auth.GetAuthdId(r)
-        fmt.Println("New Authd conn, id =", id)
-        if id == -1 {
-            return
+        if id := auth.GetAuthdId(ws.r); id != -1 {
+            ws.id = id
+
+            if conns, ok := _connsAuthd[id]; ok {
+                conns[ws.r] = ws
+            } else {
+                _connsAuthd[id] = map[*http.Request]*Conn{ws.r:ws}
+            }
+
+            // Debug
+            fmt.Println(DumpConnsAuthd("REGISTERED CONNS: AUTHD"))
+
+        } else {
+
+            // Can't find ID for authenticated connection
+            _onPanic(
+                fmt.Sprintf("Cannot find ID for authd connection"),
+                fmt.Sprintf("%v", ws.r), "", "")
         }
 
-        ws.id = id
-        _openConns_Authd[id] = ws
-
     } else {
+
         // Public connection
-        id := atomic.AddInt64(&_publicConnId, 1)
-        ws.id = id
-        _openConns_Public[id] = ws
+        _connsPublic[ws.r] = ws
+
+        // Debug
+        fmt.Println(DumpConnsPublic("REGISTERED CONNS: PUBLIC"))
     }
 }
 
 // Deregisteres connection by removing it from the registry.
 func DeregisterConn(ws *Conn) {
     if ws.isAuthd {
-        delete(_openConns_Authd, ws.id)
+        delete(_connsAuthd, ws.id)
     } else {
-        delete(_openConns_Public, ws.id)
+        delete(_connsPublic, ws.r)
     }
 }
 
 // Closes authenticated connection by ID.
 func CloseAuthdConn(id int64) {
 
-    fmt.Println("\t Close authd WebSockets for session ID =", id)
+    if conns, ok := _connsAuthd[id]; ok {
 
-    if ws, ok := _openConns_Authd[id]; ok {
-        fmt.Println("\t\t Closed authd WebSocket for session ID =", id)
-        ws.conn.Close()
-        DeregisterConn(ws)
+        // Multiple connections may share same authentication ID
+        for _, ws := range conns {
+            fmt.Printf("__X Closed WebSocket ID = %v, conn = %p\n", id, ws.conn)
+            ws.conn.Close()
+        }
+
+        DeregisterConn(&Conn{isAuthd: true, id: id})
     }
+}
+
+func DumpConnsPublic(header string) string {
+    var buf bytes.Buffer
+
+    buf.WriteString("\n")
+    buf.WriteString("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+    buf.WriteString(header)
+    buf.WriteString("\n")
+    buf.WriteString("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+
+    i := 0
+    for r, ws := range _connsPublic {
+        buf.WriteString(fmt.Sprintf("\t%v: r = %p, wsconn = %p\n", i, r, ws.conn))
+        i++
+    }
+
+    return buf.String()
+}
+
+func DumpConnsAuthd(header string) string {
+    var buf bytes.Buffer
+
+    buf.WriteString("\n")
+    buf.WriteString("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+    buf.WriteString(header)
+    buf.WriteString("\n")
+    buf.WriteString("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+
+    for i, conns := range _connsAuthd {
+        buf.WriteString(fmt.Sprintf("\t%v:\n", i))
+        j := 0
+        for r, ws := range conns {
+            buf.WriteString(fmt.Sprintf("\t\t%v: r = %p, wsconn = %p\n", j, r, ws.conn))
+        }
+    }
+
+    return buf.String()
 }
