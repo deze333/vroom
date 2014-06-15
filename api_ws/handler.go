@@ -26,7 +26,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *Router, isAuthd bool
         ReadBufferSize:  1024,
         WriteBufferSize: 1024,
         CheckOrigin: func(r *http.Request) bool {
-            fmt.Println("Check WebSocket origin: %v\n", r)
+            fmt.Printf("\n\n-------------------------------\nCheck WebSocket call: \nURL = %v \nOrigin = %v\n---------------------------------------\n\n", r.URL, r.Header["Origin"])
             return true
         },
     } 
@@ -201,11 +201,16 @@ func processMessage(w http.ResponseWriter, r *http.Request, msg []byte, ws *Conn
     // Find proc for given op
     var proc func(*Req) (interface{}, error)
     var ok bool
-    if proc, ok = ws.router.Procs[req.Op]; !ok {
-        res := NewResponse_Err(req.Id, req.Op, 
-            errors.New_NotFound(req.Op, "No matching op processor found"))
-        Respond(ws.conn, res)
-        return
+
+    // First look in core procs in this package
+    // Then look in app supplied procs
+    if proc, ok = _coreProcs[req.Op]; !ok {
+        if proc, ok = ws.router.Procs[req.Op]; !ok {
+            res := NewResponse_Err(req.Id, req.Op, 
+                errors.New_NotFound(req.Op, "No matching op processor found"))
+            Respond(ws.conn, res)
+            return
+        }
     }
 
     // Call proc

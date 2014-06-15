@@ -2,8 +2,10 @@ package api_http
 
 import (
     "fmt"
+    "path"
 	"net/http"
 	"github.com/gorilla/mux"
+    "github.com/deze333/reseer"
     "github.com/deze333/vroom/auth"
     "github.com/deze333/vroom/api_xhr"
     "github.com/deze333/vroom/api_ws"
@@ -15,6 +17,7 @@ import (
 //------------------------------------------------------------
 
 var _ctx Ctx
+var _versionWatcher *reseer.Seer
 
 //------------------------------------------------------------
 // Initialize
@@ -25,6 +28,11 @@ func Initialize(ctx Ctx) (err error) {
 
     // Authentication
     if err = Initialize_Auth(ctx.Auth); err != nil {
+        return
+    }
+
+    // Directories
+    if err = Initialize_Dirs(ctx.Dirs); err != nil {
         return
     }
 
@@ -78,10 +86,28 @@ func Initialize_Auth(params Auth) (err error) {
     return
 }
 
+// Initializes directories.
+func Initialize_Dirs(dirs Dirs) (err error) {
+
+    // Start watcher that will report
+    // changes to application files
+    _versionWatcher, err = reseer.New(
+        path.Join(dirs.VersionFileDir, "reseer_track.csv"),
+        dirs.AppWatchNotify,
+        onAppVersionChanged)
+
+    // Set initial version
+    if err == nil {
+        setAppVersion(_versionWatcher.VersionTxt())
+    }
+
+    return
+}
+
 // Initializes Websocket package.
 func Initialize_WS(ctx *Ctx) (err error) {
 
-    err = api_ws.Initialize(ctx.OnPanic)
+    err = api_ws.Initialize(GetVersion, ctx.OnPanic)
     return
 }
 
@@ -183,3 +209,11 @@ func makeRouteHandlers(ctx *Ctx, router *mux.Router, r string, h H, authd bool, 
 func addSumm(summ *util.Summary, descr, route string, obj interface{}) {
     summ.AddLine(append([]string{descr, route}, util.GetFuncInfo(obj)...)...)
 }
+
+// De-initalizes components.
+func DeInitialize() {
+
+    // Stop version watcher
+    _versionWatcher.Stop()
+}
+

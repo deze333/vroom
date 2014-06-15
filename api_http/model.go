@@ -31,9 +31,19 @@ type Auth struct {
 }
 
 //------------------------------------------------------------
-// Directories with public access
+// Directories 
 //------------------------------------------------------------
 
+type Dirs struct {
+
+    // Directory where the app resides
+    // clients will be notified on change 
+    // by broadcast "core/broadcast/app/updated"
+    AppWatchNotify []string  
+
+    // Directory to store version track file
+    VersionFileDir string
+}
 
 //------------------------------------------------------------
 // Route Handlers
@@ -70,6 +80,7 @@ type Handlers_WS struct {
 type Ctx struct {
     Presets        Presets
     Auth           Auth
+    Dirs           Dirs
     OnPanic        func(string, string, string, string) // err, url, params, stack
     Handlers_FILE  Handlers
     Handlers_HTML  Handlers
