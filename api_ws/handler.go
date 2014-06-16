@@ -56,12 +56,15 @@ func Handle(w http.ResponseWriter, r *http.Request, router *Router, isAuthd bool
 
     // Create connection object
     ws := &Conn{
-        isAuthd: isAuthd,
-        router: router,
+        w: w,
         r: r,
         conn: conn,
-        chanClose: make(chan int),
-        chanSend:  make(chan *Broadcast),
+        router: router,
+        isAuthd: isAuthd,
+        chanIn:  make(chan []byte),
+        chanOut:  make(chan []byte),
+        chanProcClose: make(chan int),
+        chanProcWriterClose: make(chan int),
         isOpen:  true,
     }
 
@@ -76,28 +79,14 @@ func Handle(w http.ResponseWriter, r *http.Request, router *Router, isAuthd bool
 
     fmt.Printf("++++ WebSocket %p opened\n", ws.conn)
 
-    // Close connection channel
-
-    // Start incoming/outgoing listeners
-    go procIncoming(w, r, ws)
-    go procOutgoing(w, r, ws)
-
-    // Wait for close message
-    <-ws.chanClose
-    ws.chanSend <- CloseBroadcastMessage
-    ws.isOpen = false
-
-    fmt.Printf("---X WebSocket %p closed\n", ws.conn)
-}
-
-// Processor for incoming (passive) messages.
-func procIncoming(w http.ResponseWriter, r *http.Request, ws *Conn) {
+    // Start async processors
+    go proc(ws)
+    go procWriter(ws)
 
     var msgType int
     var msg []byte
-    var err error
 
-    // Forever loop
+    // Forever loop listening for incoming messages
     for {
 
         // Read message
@@ -110,7 +99,7 @@ func procIncoming(w http.ResponseWriter, r *http.Request, ws *Conn) {
 
         // Text message
         case websocket.TextMessage:
-            processMessage(w, r, msg, ws)
+            ws.chanIn <- msg
 
         // Binary not supported, bye
         case websocket.BinaryMessage:
@@ -126,33 +115,48 @@ func procIncoming(w http.ResponseWriter, r *http.Request, ws *Conn) {
         }
     }
 
-    // Signal connection closed
-    ws.chanClose <- 1
+    // Signal procs to finish
+    ws.chanProcClose <- 1
+    ws.chanProcWriterClose <- 1
+    fmt.Printf("---X WebSocket %p closed\n", ws.conn)
 }
 
-// Processor for outgoing (active) messages.
-func procOutgoing(w http.ResponseWriter, r *http.Request, ws *Conn) {
-
-    var br *Broadcast
-
-    // Forever loop
+// Processes incoming channel data.
+func proc(ws *Conn) {
     for {
+        select {
 
-        // Wait on data channel
-        br = <-ws.chanSend
+        case msg := <- ws.chanIn:
+            processMessage(ws, msg)
 
-        // Close message arrived ?
-        if br.IsCloseMessage() {
-            break
+        case <- ws.chanProcClose:
+            // Exit
+            fmt.Println("---X_R proc finished")
+            return
         }
+    }
+}
 
-        res := NewResponse(-1, br.Op, br.Data)
-        Respond(ws.conn, res)
+// Processes outgoing channel responses.
+func procWriter(ws *Conn) {
+    for {
+        select {
+
+        case res := <- ws.chanOut:
+            Respond(ws.conn, res)
+
+        case <- ws.chanProcWriterClose:
+            // Exit
+            fmt.Println("---X_W procWriter finished")
+            return
+        }
     }
 }
 
 // Processes incoming messages and invokes matching data processor.
-func processMessage(w http.ResponseWriter, r *http.Request, msg []byte, ws *Conn) {
+func processMessage(ws *Conn, msg []byte) {
+
+    r := ws.r
 
     // Parse request
     var req *Req
@@ -160,17 +164,20 @@ func processMessage(w http.ResponseWriter, r *http.Request, msg []byte, ws *Conn
     if req, err = ParseReq(msg); err != nil {
         res := NewResponse_Err(req.Id, req.Op, 
             errors.New_AppErr(err, "Cannot unmarshal request"))
-        Respond(ws.conn, res)
+        ws.chanOut <- res
         return
     }
 
+    /* NOTE: Relax this requirement
     // Validate request
     if req.Id == 0 {
+        err = fmt.Errorf("Request ID is missing")
         res := NewResponse_Err(req.Id, req.Op, 
             errors.New_AppErr(err, "Request must have _reqId"))
-        Respond(ws.conn, res)
+        ws.chanOut <- res
         return
     }
+    */
 
     // HTTP request
     req.httpReq = r
@@ -182,7 +189,7 @@ func processMessage(w http.ResponseWriter, r *http.Request, msg []byte, ws *Conn
             res := NewResponse_Err(req.Id, req.Op,
                 errors.New_AppErr(fmt.Errorf("%v", err),
                 "Application error, support notified"))
-            Respond(ws.conn, res)
+            ws.chanOut <- res
 
             // Report panic: err, url, params, stack
             _onPanic(
@@ -203,7 +210,7 @@ func processMessage(w http.ResponseWriter, r *http.Request, msg []byte, ws *Conn
         if proc, ok = ws.router.Procs[req.Op]; !ok {
             res := NewResponse_Err(req.Id, req.Op, 
                 errors.New_NotFound(req.Op, "No matching op processor found"))
-            Respond(ws.conn, res)
+            ws.chanOut <- res
             return
         }
     }
@@ -222,6 +229,6 @@ func processMessage(w http.ResponseWriter, r *http.Request, msg []byte, ws *Conn
         // Application error: all programming logic error
         res = NewResponse_Err(req.Id, req.Op, errors.New(err))
     }
-    Respond(ws.conn, res)
+    ws.chanOut <- res
 }
 

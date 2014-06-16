@@ -25,7 +25,7 @@ func broadcastPublic(op string, data interface{}) (err error) {
 
     for _, ws := range _connsPublic {
         if ws.isOpen {
-            ws.chanSend <- &Broadcast{op, data}
+            ws.chanOut <- NewResponse(0, op, data)
         }
     }
 
@@ -35,12 +35,12 @@ func broadcastPublic(op string, data interface{}) (err error) {
 // Broadcasts to open authenticated websocket connections.
 func broadcastAuthd(op string, data interface{}) (err error) {
 
-    fmt.Println(DumpConnsPublic("BROADCAST AUTHD"))
+    fmt.Println(DumpConnsAuthd("BROADCAST AUTHD"))
 
     for _, conns := range _connsAuthd {
         for _, ws := range conns {
             if ws.isOpen {
-                ws.chanSend <- &Broadcast{op, data}
+                ws.chanOut <- NewResponse(0, op, data)
             }
         }
     }

@@ -15,6 +15,7 @@ type Router struct {
 }
 
 type Conn struct {
+    w         http.ResponseWriter
     r         *http.Request
 	conn      *websocket.Conn
 
@@ -23,6 +24,9 @@ type Conn struct {
 	id        int64
 	isAuthd   bool
 	isOpen    bool
-	chanClose chan int
-	chanSend  chan *Broadcast
+
+    chanIn    chan []byte
+    chanOut   chan []byte
+	chanProcClose chan int
+	chanProcWriterClose chan int
 }

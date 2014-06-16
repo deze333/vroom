@@ -214,6 +214,8 @@ func addSumm(summ *util.Summary, descr, route string, obj interface{}) {
 func DeInitialize() {
 
     // Stop version watcher
-    _versionWatcher.Stop()
+    if _versionWatcher != nil {
+        _versionWatcher.Stop()
+    }
 }
 
