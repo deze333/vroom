@@ -72,10 +72,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *Router, isAuthd bool
     RegisterConn(ws)
 
     // Close when done
-    defer func() {
-        DeregisterConn(ws)
-        ws.conn.Close()
-    }()
+    defer closeConn(ws)
 
     fmt.Printf("++++ WebSocket %p opened\n", ws.conn)
 
@@ -121,6 +118,12 @@ func Handle(w http.ResponseWriter, r *http.Request, router *Router, isAuthd bool
     fmt.Printf("---X WebSocket %p closed\n", ws.conn)
 }
 
+// Closes and deregisteres connection.
+func closeConn(ws *Conn) {
+    DeregisterConn(ws)
+    ws.conn.Close()
+}
+
 // Processes incoming channel data.
 func proc(ws *Conn) {
     for {
@@ -143,7 +146,13 @@ func procWriter(ws *Conn) {
         select {
 
         case res := <- ws.chanOut:
-            Respond(ws.conn, res)
+            err := Respond(ws.conn, res)
+
+            // Exit on write error
+            if err != nil {
+                closeConn(ws)
+                return
+            }
 
         case <- ws.chanProcWriterClose:
             // Exit

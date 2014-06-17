@@ -4,6 +4,7 @@ import (
     "fmt"
     "bytes"
 	"encoding/json"
+    "reflect"
 	"github.com/gorilla/websocket"
     "github.com/deze333/vroom/errors"
 )
@@ -72,9 +73,9 @@ func postEncode(res []byte) []byte {
 }
 
 // Responds on websocket connection.
-func Respond(conn *websocket.Conn, res []byte) {
+func Respond(conn *websocket.Conn, res []byte) (err error) {
 
-    err := conn.WriteMessage(websocket.TextMessage, res)
+    err = conn.WriteMessage(websocket.TextMessage, res)
     if err == nil {
         return
     }
@@ -84,6 +85,8 @@ func Respond(conn *websocket.Conn, res []byte) {
         fmt.Sprintf("WebSocket failed to write response, error: %v", err),
         fmt.Sprintf("%v ---> %v", conn.LocalAddr(), conn.RemoteAddr()),
         string(res),
-        "Stack not needed")
+        fmt.Sprint(reflect.TypeOf(err)))
+
+    return
 }
 
