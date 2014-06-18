@@ -117,6 +117,25 @@ func (xp XP) As_ObjectId(key string) (id *bson.ObjectId) {
     return
 }
 
+// Gets parameter as bool.
+func (xp XP) As_Bool(key string) (b bool) {
+
+    if val, ok := xp[key]; ok && val != nil {
+        if b, ok = val.(bool); ok {
+            return
+        } else {
+            str := fmt.Sprint(val)
+            if str == "true" {
+                return true
+            } else if str == "false" {
+                return false
+            } 
+            return false
+        }
+    }
+    return 
+}
+
 // Gets parameter as string.
 func (xp XP) As_String(key string) (str string) {
 
