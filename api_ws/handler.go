@@ -146,7 +146,7 @@ func procWriter(ws *Conn) {
         select {
 
         case res := <- ws.chanOut:
-            err := Respond(ws.conn, res)
+            err := Respond(ws, res)
 
             // Exit on write error
             if err != nil {

@@ -4,9 +4,9 @@ import (
     "fmt"
     "bytes"
 	"encoding/json"
-    "reflect"
 	"github.com/gorilla/websocket"
     "github.com/deze333/vroom/errors"
+    "github.com/deze333/vroom/auth"
 )
 
 //------------------------------------------------------------
@@ -73,19 +73,23 @@ func postEncode(res []byte) []byte {
 }
 
 // Responds on websocket connection.
-func Respond(conn *websocket.Conn, res []byte) (err error) {
+func Respond(conn *Conn, res []byte) (err error) {
 
-    err = conn.WriteMessage(websocket.TextMessage, res)
+    wsConn := conn.conn
+    err = wsConn.WriteMessage(websocket.TextMessage, res)
     if err == nil {
         return
     }
 
+    // Get session details
+    sess, _ := auth.GetSessionValues(conn.r)
+
     // Report panic: err, url, params, stack
     _onPanic(
         fmt.Sprintf("WebSocket failed to write response, error: %v", err),
-        fmt.Sprintf("%v ---> %v", conn.LocalAddr(), conn.RemoteAddr()),
+        fmt.Sprintf("%v #%v @ %v", sess["initials"], sess["_auth"], sess["_ip"]),
         string(res),
-        fmt.Sprint(reflect.TypeOf(err)))
+        fmt.Sprint(sess))
 
     return
 }

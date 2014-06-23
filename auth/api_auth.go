@@ -41,8 +41,6 @@ func Auth(w http.ResponseWriter, r *http.Request, vals map[string]string) (err e
     // Set session values
     sess.Values["_auth"] = util.NewID()
     sess.Values["_ip"] = r.RemoteAddr
-    // XXX
-    fmt.Println("___ auth allocated ID =", sess.Values["_auth"])
 
     // Add user values
     for k, v := range vals {
