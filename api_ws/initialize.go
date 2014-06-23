@@ -9,7 +9,7 @@ import (
 //------------------------------------------------------------
 
 var _verGetter func() string
-var _onPanic func(string, string, string, string) // err, url, params, stack
+var _onPanic func(string, string, string, string, string) // err, url, params, session, stack
 
 //------------------------------------------------------------
 // Initialization
@@ -17,7 +17,7 @@ var _onPanic func(string, string, string, string) // err, url, params, stack
 
 // Initializes websocket package.
 // OnPanic handler must be provided.
-func Initialize(verGetter func() string, onPanic func(string, string, string, string)) (err error) {
+func Initialize(verGetter func() string, onPanic func(string, string, string, string, string)) (err error) {
     
     if verGetter == nil {
         err = errors.New("Websocket handler needs Version Getter handler")

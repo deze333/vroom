@@ -4,6 +4,7 @@ import (
     "fmt"
     "strings"
 	"net/http"
+    "github.com/deze333/vroom/auth"
     "github.com/deze333/vroom/util"
 )
 
@@ -57,6 +58,7 @@ func handlePanic_HTML(w http.ResponseWriter, r *http.Request, ctx *Ctx, err inte
         fmt.Sprintf("Error processing HTML page: %v", err),
         fmt.Sprintf("%v : %v", r.Host, r.RequestURI),
         fmt.Sprint(r),
+        fmt.Sprint(auth.GetSessionValues(r)),
         util.Stack())
 }
 

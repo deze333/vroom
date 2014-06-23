@@ -17,12 +17,14 @@ var _cookiePath string
 var _cookieDomain string
 var _cookieMaxAge int
 
+var _onPanic func(string, string, string, string, string) // err, url, params, session, stack
+
 //------------------------------------------------------------
 // Initialization
 //------------------------------------------------------------
 
 // Initializes authentication mechanism.
-func Initialize(cookieSessName, cookieStoreId, cookiePath, cookieDomain, cookieMaxAge string) (err error) {
+func Initialize(cookieSessName, cookieStoreId, cookiePath, cookieDomain, cookieMaxAge string, onPanic func(string, string, string, string, string)) (err error) {
 
     if cookieSessName == "" {
         err = errors.New("Auth cannot be configured with empty cookie session name")
@@ -45,6 +47,17 @@ func Initialize(cookieSessName, cookieStoreId, cookiePath, cookieDomain, cookieM
     _cookieStore = sessions.NewCookieStore([]byte(cookieStoreId))
     _cookiePath = cookiePath
     _cookieDomain = cookieDomain
+
+    // Panic handler
+    if onPanic != nil {
+        _onPanic = onPanic
+    } else {
+        _onPanic = onPanicDisabled
+    }
     return
 }
 
+// Dummy handler
+func onPanicDisabled(err, url, params, session, stack string) {
+    // Do nothing
+}

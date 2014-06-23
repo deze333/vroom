@@ -5,6 +5,7 @@ import (
     "net/http"
     "time"
 	"github.com/gorilla/websocket"
+    "github.com/deze333/vroom/auth"
     "github.com/deze333/vroom/errors"
     "github.com/deze333/vroom/util"
 )
@@ -50,6 +51,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *Router, isAuthd bool
         _onPanic(
             fmt.Sprintf("Error setting WS deadline: %v", err),
             fmt.Sprintf("%v : %v", r.Host, r.URL),
+            fmt.Sprint(auth.GetSessionValues(r)),
             "","")
         return
     }
@@ -205,6 +207,7 @@ func processMessage(ws *Conn, msg []byte) {
                 fmt.Sprintf("Error processing WS request: %v", err),
                 fmt.Sprintf("%v : %v : %v", r.Host, ws.router.URL, req.Op),
                 fmt.Sprint(req.Params),
+                fmt.Sprint(auth.GetSessionValues(r)),
                 stack)
         }
     }()

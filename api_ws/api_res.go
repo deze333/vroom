@@ -45,11 +45,12 @@ func marshal(res *Res) []byte {
         return jsonb
     }
 
-    // Report panic: err, url, params, stack
+    // Report panic: err, url, params, session, stack
     _onPanic(
         fmt.Sprintf("Error marshalling WS response, error: %v", err),
         fmt.Sprintf("WebSocket JSON encoding"),
         fmt.Sprint(res),
+        fmt.Sprint("XXX add session data"),
         "Stack not needed")
 
     // Error marshalling response
@@ -89,7 +90,8 @@ func Respond(conn *Conn, res []byte) (err error) {
         fmt.Sprintf("WebSocket failed to write response, error: %v", err),
         fmt.Sprintf("%v #%v @ %v", sess["initials"], sess["_auth"], sess["_ip"]),
         string(res),
-        fmt.Sprint(sess))
+        fmt.Sprint(sess),
+        fmt.Sprint("Not needed"))
 
     return
 }

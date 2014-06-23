@@ -8,7 +8,7 @@ import (
 // Globals
 //------------------------------------------------------------
 
-var _onPanic func(string, string, string, string) // err, url, params, stack
+var _onPanic func(string, string, string, string, string) // err, url, params, session, stack
 
 //------------------------------------------------------------
 // Initialization
@@ -16,7 +16,7 @@ var _onPanic func(string, string, string, string) // err, url, params, stack
 
 // Initializes XHR package.
 // OnPanic handler must be provided.
-func Initialize(onPanic func(string, string, string, string)) (err error) {
+func Initialize(onPanic func(string, string, string, string, string)) (err error) {
     
     if onPanic == nil {
         err = errors.New("XHR handler needs OnPanic handler")

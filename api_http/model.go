@@ -81,7 +81,7 @@ type Ctx struct {
     Presets        Presets
     Auth           Auth
     Dirs           Dirs
-    OnPanic        func(string, string, string, string) // err, url, params, stack
+    OnPanic        func(string, string, string, string, string) // err, url, params, session, stack
     Handlers_FILE  Handlers
     Handlers_HTML  Handlers
     Handlers_XHR   Handlers_XHR

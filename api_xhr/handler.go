@@ -49,6 +49,7 @@ func Handle(w http.ResponseWriter, r *http.Request, fn func(map[string]interface
             _onPanic(
                 fmt.Sprintf("Error processing XHR request: %v", err),
                 fmt.Sprintf("%v : %v", r.Host, r.RequestURI),
+                fmt.Sprint(auth.GetSessionValues(r)),
                 fmt.Sprint(req),
                 util.Stack())
         }

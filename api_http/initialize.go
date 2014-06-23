@@ -27,7 +27,7 @@ var _versionWatcher *reseer.Seer
 func Initialize(ctx Ctx) (err error) {
 
     // Authentication
-    if err = Initialize_Auth(ctx.Auth); err != nil {
+    if err = Initialize_Auth(&ctx); err != nil {
         return
     }
 
@@ -62,7 +62,9 @@ func Initialize(ctx Ctx) (err error) {
 }
 
 // Initializes authentication mechanism.
-func Initialize_Auth(params Auth) (err error) {
+func Initialize_Auth(ctx *Ctx) (err error) {
+
+    params := ctx.Auth
 
     if params.CookieName == "" {
         return fmt.Errorf("Cookie name must be specified")
@@ -78,6 +80,7 @@ func Initialize_Auth(params Auth) (err error) {
         params.CookiePath, 
         params.CookieDomain, 
         params.CookieMaxAge, 
+        ctx.OnPanic,
     )
 
     // Register de-auth listeners, ie persistent connections

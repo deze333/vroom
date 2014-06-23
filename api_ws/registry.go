@@ -47,7 +47,7 @@ func RegisterConn(ws *Conn) {
             // Can't find ID for authenticated connection
             _onPanic(
                 fmt.Sprintf("Cannot find ID for authd connection"),
-                fmt.Sprintf("%v", ws.r), "", "")
+                fmt.Sprintf("%v", ws.r), "", "", "")
         }
 
     } else {
