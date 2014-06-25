@@ -11,12 +11,6 @@ import (
 // Registry of active WebSocket connections
 //------------------------------------------------------------
 
-/*
-var _openConns_Authd = map[int64]*Conn{}
-var _openConns_Public = map[int64]*Conn{}
-var _publicConnId int64 = 0
-*/
-
 var _connsPublic = map[*http.Request]*Conn{}
 var _connsAuthd = map[int64]map[*http.Request]*Conn{}
 
@@ -63,7 +57,9 @@ func RegisterConn(ws *Conn) {
 // Deregisteres connection by removing it from the registry.
 func DeregisterConn(ws *Conn) {
     if ws.isAuthd {
-        delete(_connsAuthd, ws.id)
+        if conns, ok := _connsAuthd[ws.id]; ok {
+            delete(conns, ws.r)
+        }
     } else {
         delete(_connsPublic, ws.r)
     }
@@ -83,6 +79,43 @@ func CloseAuthdConn(id int64) {
         DeregisterConn(&Conn{isAuthd: true, id: id})
     }
 }
+
+//------------------------------------------------------------
+// Monitoring functions
+//------------------------------------------------------------
+
+func ConnsInfoAuthd() (infos []map[string]interface{}) {
+
+    infos = []map[string]interface{}{}
+
+    // For each registered request connection
+    for i, conns := range _connsAuthd {
+
+        // Add its opened WebSocket sessions
+        for r, ws := range conns {
+
+            info := map[string]interface{}{}
+            info["_authId"] = i
+            info["_httpReqId"] = fmt.Sprintf("%p", r)
+
+            sessVals, _ := auth.GetSessionValues(r)
+            for k, v := range sessVals {
+                info["sess/" + k] = v
+            }
+
+            info["ws/authd"] = fmt.Sprint(ws.isAuthd)
+            info["ws/open"] = fmt.Sprint(ws.isOpen)
+
+            infos = append(infos, info)
+        }
+    }
+
+    return
+}
+
+//------------------------------------------------------------
+// Debug functions
+//------------------------------------------------------------
 
 func DumpConnsPublic(header string) string {
     var buf bytes.Buffer

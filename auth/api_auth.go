@@ -40,7 +40,7 @@ func Auth(w http.ResponseWriter, r *http.Request, vals map[string]string) (err e
     
     // Set session values
     sess.Values["_auth"] = util.NewID()
-    sess.Values["_ip"] = r.RemoteAddr
+    sess.Values["_ip"] = util.GetRequestIP(r)
 
     // Add user values
     for k, v := range vals {
@@ -62,6 +62,15 @@ func Auth(w http.ResponseWriter, r *http.Request, vals map[string]string) (err e
     err = sess.Save(r, w)
 
     //fmt.Println(">>> LOGIN:", sess.Options, sess.Values)
+    // Repost user logged in: err, url, params, session, stack
+    sess, _ = _cookieStore.Get(r, _cookieSessName)
+    _onPanic(
+        fmt.Sprintf("User logged in"),
+        fmt.Sprintf("%v #%v @ %v", sess.Values["initials"], sess.Values["_auth"], sess.Values["_ip"]),
+        fmt.Sprint("Not needed"),
+        fmt.Sprint(sess),
+        fmt.Sprint("Not needed"))
+
     return
 }
 

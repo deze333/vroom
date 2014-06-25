@@ -85,7 +85,7 @@ func Respond(conn *Conn, res []byte) (err error) {
     // Get session details
     sess, _ := auth.GetSessionValues(conn.r)
 
-    // Report panic: err, url, params, stack
+    // Report panic: err, url, params, session, stack
     _onPanic(
         fmt.Sprintf("WebSocket failed to write response, error: %v", err),
         fmt.Sprintf("%v #%v @ %v", sess["initials"], sess["_auth"], sess["_ip"]),
