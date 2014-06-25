@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
     "github.com/deze333/vroom/errors"
-    "github.com/deze333/vroom/auth"
 )
 
 //------------------------------------------------------------
@@ -82,6 +81,8 @@ func Respond(conn *Conn, res []byte) (err error) {
         return
     }
 
+    // TODO Include reporting in admin
+    /*
     // Get session details
     sess, _ := auth.GetSessionValues(conn.r)
 
@@ -92,6 +93,7 @@ func Respond(conn *Conn, res []byte) (err error) {
         string(res),
         fmt.Sprint(sess),
         fmt.Sprint("Not needed"))
+    */
 
     return
 }
