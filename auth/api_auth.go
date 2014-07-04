@@ -68,9 +68,7 @@ func Auth(w http.ResponseWriter, r *http.Request, vals map[string]string) (err e
 	_onPanic(
 		fmt.Sprintf("User logged in"),
 		fmt.Sprintf("%v #%v @ %v", sess.Values["initials"], sess.Values["_auth"], sess.Values["_ip"]),
-		fmt.Sprint("Not needed"),
-		fmt.Sprint(sess),
-		fmt.Sprint("Not needed"))
+		"Session", fmt.Sprint(sess))
 
 	return
 }

@@ -3,6 +3,7 @@ package api_ws
 import (
 	"net/http"
 
+	"github.com/deze333/vroom/reqres"
 	"github.com/gorilla/websocket"
 )
 
@@ -10,17 +11,12 @@ import (
 // Websocket connection
 //------------------------------------------------------------
 
-type Router struct {
-	URL   string
-	Procs map[string]func(*Req) (interface{}, error)
-}
-
 type Conn struct {
 	w    http.ResponseWriter
 	r    *http.Request
 	conn *websocket.Conn
 
-	router *Router
+	router *reqres.WebSocket_Router
 
 	id      string
 	isAuthd bool

@@ -1,14 +1,14 @@
 package api_xhr
 
 import (
-    "errors"
+	"errors"
 )
 
 //------------------------------------------------------------
 // Globals
 //------------------------------------------------------------
 
-var _onPanic func(string, string, string, string, string) // err, url, params, session, stack
+var _onPanic func(string, string, ...interface{}) // msg, details, kvals
 
 //------------------------------------------------------------
 // Initialization
@@ -16,14 +16,13 @@ var _onPanic func(string, string, string, string, string) // err, url, params, s
 
 // Initializes XHR package.
 // OnPanic handler must be provided.
-func Initialize(onPanic func(string, string, string, string, string)) (err error) {
-    
-    if onPanic == nil {
-        err = errors.New("XHR handler needs OnPanic handler")
-        return
-    }
+func Initialize(onPanic func(string, string, ...interface{})) (err error) {
 
-    _onPanic = onPanic
-    return
+	if onPanic == nil {
+		err = errors.New("XHR handler needs OnPanic handler")
+		return
+	}
+
+	_onPanic = onPanic
+	return
 }
-

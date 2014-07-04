@@ -1,31 +1,37 @@
 package api_xhr
 
 import (
-    "io"
 	"encoding/json"
-    "net/http"
+	"io"
+	"net/http"
+
+	"github.com/deze333/vroom/reqres"
 )
 
 //------------------------------------------------------------
 // XHR Request
 //------------------------------------------------------------
 
-// Parses JSON request into a map. 
-func ParseReq(r *http.Request) (req map[string]interface{}, err error) {
+// Parses JSON request into package request.
+func ParseReq(w http.ResponseWriter, r *http.Request) (req *reqres.Req, err error) {
 
-    // Decode
-    decoder := json.NewDecoder(r.Body)
-    req = map[string]interface{}{}
-    err = decoder.Decode(&req)
-    if err == nil {
-        return
-    }
+	// Decode
+	decoder := json.NewDecoder(r.Body)
+	params := map[string]interface{}{}
+	err = decoder.Decode(&params)
+	if err == nil {
+		return
+	}
 
-    // Empty request is not an error
-    if err == io.EOF {
-        err = nil
-    } 
+	// Empty request is not an error
+	if err == io.EOF {
+		err = nil
+	}
 
-    return
+	req = &reqres.Req{
+		Params:        params,
+		HttpReq:       r,
+		HttpResWriter: w,
+	}
+	return
 }
-

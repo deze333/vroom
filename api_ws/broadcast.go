@@ -1,7 +1,7 @@
 package api_ws
 
 import (
-    "fmt"
+	"fmt"
 )
 
 //------------------------------------------------------------
@@ -9,41 +9,41 @@ import (
 //------------------------------------------------------------
 
 // Returns public broadcaster.
-func GetBroadcaster_Public() (func (string, interface{}) (err error)) {
-    return broadcastPublic
+func GetBroadcaster_Public() func(string, interface{}) (err error) {
+	return broadcastPublic
 }
 
 // Returns authenticated broadcaster.
-func GetBroadcaster_Authd() (func (string, interface{}) (err error)) {
-    return broadcastAuthd
+func GetBroadcaster_Authd() func(string, interface{}) (err error) {
+	return broadcastAuthd
 }
 
 // Broadcasts to open public websocket connections.
 func broadcastPublic(op string, data interface{}) (err error) {
 
-    fmt.Println(DumpConnsPublic("BROADCAST PUBLIC"))
+	fmt.Println(DumpConnsPublic("BROADCAST PUBLIC"))
 
-    for _, ws := range _connsPublic {
-        if ws.isOpen {
-            ws.chanOut <- NewResponse(0, op, data)
-        }
-    }
+	for _, ws := range _connsPublic {
+		if ws.isOpen {
+			ws.chanOut <- NewResponse_Broadcast(0, op, data)
+		}
+	}
 
-    return
+	return
 }
 
 // Broadcasts to open authenticated websocket connections.
 func broadcastAuthd(op string, data interface{}) (err error) {
 
-    fmt.Println(DumpConnsAuthd("BROADCAST AUTHD"))
+	fmt.Println(DumpConnsAuthd("BROADCAST AUTHD"))
 
-    for _, conns := range _connsAuthd {
-        for _, ws := range conns {
-            if ws.isOpen {
-                ws.chanOut <- NewResponse(0, op, data)
-            }
-        }
-    }
+	for _, conns := range _connsAuthd {
+		for _, ws := range conns {
+			if ws.isOpen {
+				ws.chanOut <- NewResponse_Broadcast(0, op, data)
+			}
+		}
+	}
 
-    return
+	return
 }

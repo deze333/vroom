@@ -1,7 +1,7 @@
 package api_ws
 
 import (
-    "errors"
+	"errors"
 )
 
 //------------------------------------------------------------
@@ -9,7 +9,7 @@ import (
 //------------------------------------------------------------
 
 var _verGetter func() string
-var _onPanic func(string, string, string, string, string) // err, url, params, session, stack
+var _onPanic func(string, string, ...interface{}) // msg, details, kvals
 
 //------------------------------------------------------------
 // Initialization
@@ -17,20 +17,19 @@ var _onPanic func(string, string, string, string, string) // err, url, params, s
 
 // Initializes websocket package.
 // OnPanic handler must be provided.
-func Initialize(verGetter func() string, onPanic func(string, string, string, string, string)) (err error) {
-    
-    if verGetter == nil {
-        err = errors.New("Websocket handler needs Version Getter handler")
-        return
-    }
+func Initialize(verGetter func() string, onPanic func(string, string, ...interface{})) (err error) {
 
-    if onPanic == nil {
-        err = errors.New("Websocket handler needs OnPanic handler")
-        return
-    }
+	if verGetter == nil {
+		err = errors.New("Websocket handler needs Version Getter handler")
+		return
+	}
 
-    _verGetter = verGetter
-    _onPanic = onPanic
-    return
+	if onPanic == nil {
+		err = errors.New("Websocket handler needs OnPanic handler")
+		return
+	}
+
+	_verGetter = verGetter
+	_onPanic = onPanic
+	return
 }
-
