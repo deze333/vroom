@@ -20,7 +20,8 @@ func IsAuthd(r *http.Request) bool {
 		return false
 	}
 
-	//fmt.Println("\t??? IS LOGGED IN:", sess.Options, sess.Values)
+	fmt.Println("COOKIE SESSION:", _cookieSessName)
+	fmt.Println("IS USER LOGGED IN:", sess.Options, sess.Values)
 
 	if _, ok := sess.Values["_auth"]; ok {
 		return true
