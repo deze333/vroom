@@ -9,6 +9,7 @@ import (
 	"github.com/deze333/vroom/api_ws"
 	"github.com/deze333/vroom/api_xhr"
 	"github.com/deze333/vroom/auth"
+	"github.com/deze333/vroom/reqres"
 	"github.com/deze333/vroom/util"
 	"github.com/gorilla/mux"
 )
@@ -40,6 +41,11 @@ func Initialize(ctx Ctx) (err error) {
 	// On Panic
 	if ctx.OnPanic == nil {
 		return fmt.Errorf("OnPanic handler must be provided")
+	}
+
+	// ReqRes
+	if err = Initialize_ReqRes(&ctx); err != nil {
+		return
 	}
 
 	// XHR
@@ -105,6 +111,13 @@ func Initialize_Dirs(dirs Dirs) (err error) {
 		setAppVersion(_versionWatcher.VersionTxt())
 	}
 
+	return
+}
+
+// Initializes ReqRes package.
+func Initialize_ReqRes(ctx *Ctx) (err error) {
+
+	err = reqres.Initialize(ctx.OnPanic)
 	return
 }
 

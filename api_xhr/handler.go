@@ -19,7 +19,7 @@ func Handle_NotAuthd(w http.ResponseWriter, r *http.Request) {
 	// Error 401, Unathorized
 	w.WriteHeader(http.StatusUnauthorized)
 
-	res := NewResponse_Err(errors.New_NotAuthd())
+	res := NewResponse_Err(nil, errors.New_NotAuthd())
 	w.Write(res)
 }
 
@@ -33,7 +33,7 @@ func Handle(w http.ResponseWriter, r *http.Request, fn func(*reqres.Req) (interf
 
 	// On parse error
 	if err != nil {
-		res := NewResponse_Err(errors.New_AppErr(err,
+		res := NewResponse_Err(req, errors.New_AppErr(err,
 			"Error parsing request data as JSON"))
 		w.Write(res)
 		return
@@ -42,7 +42,7 @@ func Handle(w http.ResponseWriter, r *http.Request, fn func(*reqres.Req) (interf
 	// Catch panic
 	defer func() {
 		if err := recover(); err != nil {
-			res := NewResponse_Err(errors.New_AppErr(fmt.Errorf("%v", err),
+			res := NewResponse_Err(req, errors.New_AppErr(fmt.Errorf("%v", err),
 				"Application error, support notified"))
 			w.Write(res)
 
@@ -64,12 +64,12 @@ func Handle(w http.ResponseWriter, r *http.Request, fn func(*reqres.Req) (interf
 		// Error can be either:
 		// Request error: prepended with "ERR:" to be shown to user
 		// Application error: all programming logic error
-		res := NewResponse_Err(errors.New(err))
+		res := NewResponse_Err(req, errors.New(err))
 		w.Write(res)
 		return
 	}
 
 	// Successful response
-	res := NewResponse(data)
+	res := NewResponse(req, data)
 	w.Write(res)
 }

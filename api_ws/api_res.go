@@ -1,10 +1,6 @@
 package api_ws
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-
 	"github.com/deze333/vroom/errors"
 	"github.com/deze333/vroom/reqres"
 	"github.com/gorilla/websocket"
@@ -23,7 +19,7 @@ func NewResponse(req *reqres.Req, data interface{}) []byte {
 		Data: data,
 	}
 
-	return marshal(req, res) //postEncode(marshal(res))
+	return res.Marshal(req)
 }
 
 // Marshals broadcast response.
@@ -35,7 +31,7 @@ func NewResponse_Broadcast(id int, op string, data interface{}) []byte {
 		Data: data,
 	}
 
-	return marshal(nil, res) //postEncode(marshal(res))
+	return res.Marshal(nil)
 }
 
 // Marshals error condition.
@@ -47,49 +43,7 @@ func NewResponse_Err(req *reqres.Req, err *errors.ResError) []byte {
 		Err: err,
 	}
 
-	return marshal(req, res) //postEncode(marshal(res))
-}
-
-// Marshals response to JSON.
-func marshal(req *reqres.Req, res *reqres.Res) []byte {
-
-	jsonb, err := json.Marshal(res)
-	if err == nil {
-		return jsonb
-	}
-
-	// Report marshalling error
-	if req != nil {
-		_onPanic(
-			fmt.Sprintf("Error marshalling WS response: %v", err),
-			fmt.Sprintf("%v : %v", req.HttpReq.Host, req.HttpReq.RequestURI),
-			"Session", fmt.Sprint(req.GetSessionValues(),
-				"Data", res.Data))
-	} else {
-		_onPanic(
-			fmt.Sprintf("Error marshalling WS broadcast: %v", err),
-			"",
-			"Data", res.Data)
-	}
-
-	// Error marshalling response
-	resErr, _ := json.Marshal(
-		errors.New_AppErr(err, "Cannot marshal JSON response"))
-
-	return []byte(fmt.Sprintf(
-		`{"_id": %v, "op": "%v", "_err": %v}`,
-		res.Id, res.Op, string(resErr)))
-}
-
-// Makes some post encoding adjustements to achieve correct JSON.
-func postEncode(res []byte) []byte {
-
-	// XXX Perhaps I need to read the manual...
-	// Fix of strange behaviour when writer expects second %
-	// after first and otherwise says (MISSING), that breaks JSON parser.
-	// SOLUTION:
-	// Convert % into %%.
-	return bytes.Replace(res, []byte{'%'}, []byte{'%', '%'}, -1)
+	return res.Marshal(req)
 }
 
 // Responds on websocket connection.
