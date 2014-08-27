@@ -19,9 +19,6 @@ func ParseReq(w http.ResponseWriter, r *http.Request) (req *reqres.Req, err erro
 	decoder := json.NewDecoder(r.Body)
 	params := map[string]interface{}{}
 	err = decoder.Decode(&params)
-	if err == nil {
-		return
-	}
 
 	// Empty request is not an error
 	if err == io.EOF {
