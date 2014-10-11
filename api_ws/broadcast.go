@@ -23,12 +23,18 @@ func broadcastPublic(op string, data interface{}) (err error) {
 
 	fmt.Println(DumpConnsPublic("BROADCAST PUBLIC"))
 
+	/* OLD STYLE:
 	for _, ws := range _connsPublic {
 		if ws.isOpen {
 			ws.chanOut <- NewResponse_Broadcast(0, op, data)
 		}
 	}
+	*/
 
+	_chanBroadcast <- &Message{
+		isAuthd: false,
+		res:     NewResponse_Broadcast(0, op, data),
+	}
 	return
 }
 
@@ -37,12 +43,20 @@ func broadcastAuthd(op string, data interface{}) (err error) {
 
 	fmt.Println(DumpConnsAuthd("BROADCAST AUTHD"))
 
+	/* OLD STYLE:
 	for _, conns := range _connsAuthd {
 		for _, ws := range conns {
 			if ws.isOpen {
 				ws.chanOut <- NewResponse_Broadcast(0, op, data)
 			}
 		}
+	}
+	*/
+
+	// XXX via channel
+	_chanBroadcast <- &Message{
+		isAuthd: true,
+		res:     NewResponse_Broadcast(0, op, data),
 	}
 
 	return

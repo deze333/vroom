@@ -5,7 +5,7 @@ import (
 )
 
 //------------------------------------------------------------
-// Core message processors
+// Core router handlers
 //------------------------------------------------------------
 
 // Core processors that get matched first

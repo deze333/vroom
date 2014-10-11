@@ -9,10 +9,14 @@ import (
 //------------------------------------------------------------
 
 const (
+	// Prefix for errors
+	ERR_PREFIX_BAD_DATA = "(BAD_DATA)" // user supplied bad data
+
+	// Values passed to browser
 	ERR_NOT_FOUND = "NOT_FOUND" // requested URL not found
 	ERR_NOT_AUTHD = "NOT_AUTHD" // user not authenticated for this request
 	ERR_APP       = "APP_ERR"   // error on app side (can't open file, etc.)
-	ERR_REQ       = "REQ_ERR"   // erroneous request (wrong format, etc.)
+	ERR_REQ       = "REQ_ERR"   // erroneous request (wrong data, etc.)
 )
 
 // Response error
@@ -31,9 +35,9 @@ func (e *ResError) Error() string {
 func New(err error) *ResError {
 
 	s := err.Error()
-	if strings.HasPrefix(s, "UI_ERR:") {
-		// match length of "UI_ERR:" prefix
-		return &ResError{ERR_REQ, "Request error", s[7:]}
+	if strings.HasPrefix(s, ERR_PREFIX_BAD_DATA) {
+		// Remove prefix
+		return &ResError{ERR_REQ, "Request error", s[len(ERR_PREFIX_BAD_DATA):]}
 	} else {
 		return &ResError{ERR_APP, s, "Application error"}
 	}

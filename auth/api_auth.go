@@ -75,7 +75,7 @@ func Auth(w http.ResponseWriter, r *http.Request, vals map[string]string) (err e
 }
 
 // Retrieves authentication ID from the session.
-// Returns -1 if not found.
+// Returns empty string if not found.
 func GetAuthdId(r *http.Request) string {
 
 	sess, _ := _cookieStore.Get(r, _cookieSessName)

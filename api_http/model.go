@@ -15,10 +15,6 @@ type RouteHandler struct {
 	handler func(http.ResponseWriter, *http.Request)
 }
 
-//------------------------------------------------------------
-// API action
-//------------------------------------------------------------
-
 type Presets struct {
 	IsDebug bool
 }

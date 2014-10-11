@@ -3,7 +3,6 @@ package api_ws
 import (
 	"bytes"
 	"fmt"
-	"net/http"
 
 	"github.com/deze333/vroom/auth"
 )
@@ -12,8 +11,8 @@ import (
 // Registry of active WebSocket connections
 //------------------------------------------------------------
 
-var _connsPublic = map[*http.Request]*Conn{}
-var _connsAuthd = map[string]map[*http.Request]*Conn{}
+var _connsPublic = map[string]*Conn{}           // {agentId: conn}
+var _connsAuthd = map[string]map[string]*Conn{} // {authId: {agentId: conn}}
 
 //------------------------------------------------------------
 // Functions
@@ -26,12 +25,20 @@ func RegisterConn(ws *Conn) {
 
 		// Authenticated connection
 		if id := auth.GetAuthdId(ws.r); id != "" {
-			ws.id = id
 
-			if conns, ok := _connsAuthd[id]; ok {
-				conns[ws.r] = ws
+			// Use authentication ID
+			ws.authId = id
+
+			// Try to use "email" from session values
+			if vals, err := auth.GetSessionValues(ws.r); err == nil {
+				ws.authEmail = vals["email"]
+			}
+
+			// Add authd connection
+			if conns, ok := _connsAuthd[ws.authId]; ok {
+				conns[ws.agentId] = ws
 			} else {
-				_connsAuthd[id] = map[*http.Request]*Conn{ws.r: ws}
+				_connsAuthd[ws.authId] = map[string]*Conn{ws.agentId: ws}
 			}
 
 			// Debug
@@ -48,7 +55,7 @@ func RegisterConn(ws *Conn) {
 	} else {
 
 		// Public connection
-		_connsPublic[ws.r] = ws
+		_connsPublic[ws.agentId] = ws
 
 		// Debug
 		fmt.Println(DumpConnsPublic("REGISTERED CONNS: PUBLIC"))
@@ -58,11 +65,52 @@ func RegisterConn(ws *Conn) {
 // Deregisteres connection by removing it from the registry.
 func DeregisterConn(ws *Conn) {
 	if ws.isAuthd {
-		if conns, ok := _connsAuthd[ws.id]; ok {
-			delete(conns, ws.r)
+		// Authd connections
+		if conns, ok := _connsAuthd[ws.authId]; ok {
+			delete(conns, ws.agentId)
+		}
+
+		// Debug
+		fmt.Println(DumpConnsAuthd("REGISTERED CONNS: AUTHD"))
+
+	} else {
+		// Public connections
+		delete(_connsPublic, ws.agentId)
+
+		// Debug
+		fmt.Println(DumpConnsPublic("REGISTERED CONNS: PUBLIC"))
+	}
+}
+
+// Finds connection that corresponds to agentId.
+func GetConn(isAuthd bool, agentId string) (ws *Conn) {
+	if isAuthd {
+		// Authd connections
+		for _, conns := range _connsAuthd {
+			if ws, ok := conns[agentId]; ok {
+				return ws
+			}
 		}
 	} else {
-		delete(_connsPublic, ws.r)
+		// Public connections
+		ws = _connsPublic[agentId]
+	}
+	return
+}
+
+// Applies function fn to all public connections.
+func applyToPublic(fn func(*Conn)) {
+	for _, conn := range _connsPublic {
+		fn(conn)
+	}
+}
+
+// Applies function fn to all authd connections.
+func applyToAuthd(fn func(*Conn)) {
+	for _, conns := range _connsAuthd {
+		for _, conn := range conns {
+			fn(conn)
+		}
 	}
 }
 
@@ -77,7 +125,7 @@ func CloseAuthdConn(id string) {
 			ws.conn.Close()
 		}
 
-		DeregisterConn(&Conn{isAuthd: true, id: id})
+		DeregisterConn(&Conn{isAuthd: true, authId: id})
 	}
 }
 
@@ -90,16 +138,16 @@ func ConnsInfoAuthd() (infos []map[string]interface{}) {
 	infos = []map[string]interface{}{}
 
 	// For each registered request connection
-	for i, conns := range _connsAuthd {
+	for authId, conns := range _connsAuthd {
 
 		// Add its opened WebSocket sessions
-		for r, ws := range conns {
+		for agentId, ws := range conns {
 
 			info := map[string]interface{}{}
-			info["_authId"] = i
-			info["_httpReqId"] = fmt.Sprintf("%p", r)
+			info["_authId"] = authId
+			info["_httpReqId"] = fmt.Sprintf("%v", agentId)
 
-			sessVals, _ := auth.GetSessionValues(r)
+			sessVals, _ := auth.GetSessionValues(ws.r)
 			for k, v := range sessVals {
 				info["sess/"+k] = v
 			}
@@ -128,8 +176,8 @@ func DumpConnsPublic(header string) string {
 	buf.WriteString("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
 	i := 0
-	for r, ws := range _connsPublic {
-		buf.WriteString(fmt.Sprintf("\t%v: r = %p, wsconn = %p\n", i, r, ws.conn))
+	for agentId, ws := range _connsPublic {
+		buf.WriteString(fmt.Sprintf("\t%v: agentId = %v, wsconn = %p\n", i, agentId, ws.conn))
 		i++
 	}
 
@@ -145,11 +193,12 @@ func DumpConnsAuthd(header string) string {
 	buf.WriteString("\n")
 	buf.WriteString("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
-	for i, conns := range _connsAuthd {
-		buf.WriteString(fmt.Sprintf("\t%v:\n", i))
+	for authId, conns := range _connsAuthd {
+		buf.WriteString(fmt.Sprintf("\t%v:\n", authId))
 		j := 0
-		for r, ws := range conns {
-			buf.WriteString(fmt.Sprintf("\t\t%v: r = %p, wsconn = %p\n", j, r, ws.conn))
+		for agentId, ws := range conns {
+			buf.WriteString(fmt.Sprintf("\t\t%v: %v, agentId = %v, wsconn = %p\n", j, ws.authEmail, agentId, ws.conn))
+			j++
 		}
 	}
 

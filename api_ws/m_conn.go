@@ -2,6 +2,7 @@ package api_ws
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/deze333/vroom/reqres"
 	"github.com/gorilla/websocket"
@@ -18,12 +19,23 @@ type Conn struct {
 
 	router *reqres.WebSocket_Router
 
-	id      string
-	isAuthd bool
-	isOpen  bool
+	agentId   string
+	authId    string
+	authEmail string
+	isAuthd   bool
+	isOpen    bool
 
 	chanIn              chan []byte
 	chanOut             chan []byte
 	chanProcClose       chan int
 	chanProcWriterClose chan int
+}
+
+type Message struct {
+	isAuthd     bool
+	agentId     string
+	failTime    *time.Time
+	isProcessed bool
+	req         []byte
+	res         []byte
 }
