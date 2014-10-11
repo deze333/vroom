@@ -130,6 +130,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *reqres.WebSocket_Rou
 				vals, _ := auth.GetSessionValues(r)
 				if q, ok := vals["qualities"]; ok {
 					if strings.Contains(q, "tester") {
+						fmt.Println("___TESTER____")
 						_chanIn <- &Message{isAuthd: isAuthd, agentId: agentId, req: msg}
 					} else {
 						ws.chanIn <- msg
