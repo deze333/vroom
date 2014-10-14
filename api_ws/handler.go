@@ -3,7 +3,6 @@ package api_ws
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/deze333/vroom/auth"
@@ -123,18 +122,18 @@ func Handle(w http.ResponseWriter, r *http.Request, router *reqres.WebSocket_Rou
 		case websocket.TextMessage:
 
 			fmt.Println("O__________")
-			// XXX TEMP TESTING
+			// XXX TEMP TESTING FOR NEWER PROC
 			// Choose processing logic depending on user type
-			if isAuthd {
 
-				vals, _ := auth.GetSessionValues(r)
-				if q, ok := vals["qualities"]; ok {
-					if strings.Contains(q, "tester") {
-						fmt.Println("___TESTER____")
-						_chanIn <- &Message{isAuthd: isAuthd, agentId: agentId, req: msg}
-					} else {
-						ws.chanIn <- msg
-					}
+			// XXX Force via _chanIn:
+			//vals, _ := auth.GetSessionValues(r)
+			//if q, ok := vals["qualities"]; ok {
+			if true {
+				//if strings.Contains(q, "tester") {
+				if true {
+					_chanIn <- &Message{isAuthd: isAuthd, agentId: agentId, req: msg}
+				} else {
+					ws.chanIn <- msg
 				}
 			}
 			fmt.Println("__________X")
