@@ -49,8 +49,15 @@ func Auth(w http.ResponseWriter, r *http.Request, vals map[string]string) (err e
 		sess.Values[k] = v
 	}
 
-	sess.Options = &sessions.Options{
-		MaxAge: _cookieMaxAge,
+	// Create session options
+	sess.Options = &sessions.Options{}
+
+	if remember, ok := vals["remember"]; ok && remember == "true" {
+		// Never expires, set to 3 years
+		sess.Options.MaxAge = 3 * 365 * 24 * 60 * 60
+	} else {
+		// Default expiry
+		sess.Options.MaxAge = _cookieMaxAge
 	}
 
 	if _cookiePath != "" {
