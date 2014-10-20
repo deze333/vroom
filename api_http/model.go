@@ -16,7 +16,7 @@ type RouteHandler struct {
 }
 
 type Presets struct {
-	IsDebug bool
+	// Placeholder for extras
 }
 
 type Auth struct {

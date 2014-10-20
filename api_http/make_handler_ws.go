@@ -19,7 +19,7 @@ func makeHandler_WS(ctx *Ctx, router *reqres.WebSocket_Router, needsAuth bool) h
 		//w.Header().Add("Vary", "Cookie")
 
 		// Client needs to be authenticated ?
-		if !ctx.Presets.IsDebug && needsAuth && !isAuthPassed(w, r, ctx) {
+		if needsAuth && !isAuthPassed(w, r, ctx) {
 			api_ws.Handle_NotAuthd(w, r)
 			return
 		}

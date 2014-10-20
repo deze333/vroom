@@ -25,7 +25,7 @@ func makeHandler_XHR(ctx *Ctx, fn func(*reqres.Req) (interface{}, error), needsA
 		w.Header().Set("Content-Type", "application/json")
 
 		// Client needs to be authenticated ?
-		if !ctx.Presets.IsDebug && needsAuth && !isAuthPassed(w, r, ctx) {
+		if needsAuth && !isAuthPassed(w, r, ctx) {
 			api_xhr.Handle_NotAuthd(w, r)
 			return
 		}
