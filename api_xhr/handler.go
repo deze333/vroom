@@ -42,8 +42,9 @@ func Handle(w http.ResponseWriter, r *http.Request, fn func(*reqres.Req) (interf
 	// Catch panic
 	defer func() {
 		if err := recover(); err != nil {
-			res := NewResponse_Err(req, errors.New_AppErr(fmt.Errorf("%v", err),
-				"Application error, support notified"))
+			res := NewResponse_Err(req, errors.New_AppErrWithStack(fmt.Errorf("%v", err),
+				"Application error, support notified",
+				util.Stack()))
 			w.Write(res)
 
 			// Report panic: err, url, params, stack
