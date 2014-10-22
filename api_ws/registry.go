@@ -31,7 +31,7 @@ func RegisterConn(ws *Conn) {
 
 			// Try to use "email" from session values
 			if vals, err := auth.GetSessionValues(ws.r); err == nil {
-				ws.authEmail = vals["email"]
+				ws.authEmail = fmt.Sprint(vals["email"])
 			}
 
 			// Add authd connection

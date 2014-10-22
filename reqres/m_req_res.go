@@ -39,12 +39,27 @@ type Res struct {
 //------------------------------------------------------------
 
 // Returns session values of underlying HTTP request.
-func (r *Req) GetSessionValues() map[string]string {
+func (r *Req) GetSessionValues() map[string]interface{} {
 	vals, err := auth.GetSessionValues(r.HttpReq)
 	if err != nil {
-		vals = map[string]string{}
+		vals = map[string]interface{}{}
 	}
 	return vals
+}
+
+// Returns specific session value of underlying HTTP request.
+// Returns empty string if value doesn't exist.
+func (r *Req) GetSessionValue(key string) interface{} {
+	vals, err := auth.GetSessionValues(r.HttpReq)
+	if err != nil {
+		return nil
+	}
+
+	if val, ok := vals[key]; ok {
+		return val
+	}
+
+	return nil
 }
 
 //------------------------------------------------------------

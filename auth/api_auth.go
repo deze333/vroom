@@ -128,7 +128,7 @@ func DeAuth(w http.ResponseWriter, r *http.Request) (err error) {
 }
 
 // Retrieve existing session.
-func GetSessionValues(r *http.Request) (info map[string]string, err error) {
+func GetSessionValues(r *http.Request) (info map[string]interface{}, err error) {
 
 	// Get session which may be a new one
 	sess, err := _cookieStore.Get(r, _cookieSessName)
@@ -140,14 +140,14 @@ func GetSessionValues(r *http.Request) (info map[string]string, err error) {
 	//fmt.Println("--->", r.RequestURI, ", Session :", sess.Values)
 
 	// Build user info
-	info = map[string]string{}
+	info = map[string]interface{}{}
 
 	for k, val := range sess.Values {
 		key := fmt.Sprint(k)
 		if len(key) > 0 && key[0] == '_' {
 			continue
 		}
-		info[key] = fmt.Sprint(val)
+		info[key] = val
 	}
 	return
 }
