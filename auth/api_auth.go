@@ -70,13 +70,15 @@ func Auth(w http.ResponseWriter, r *http.Request, vals map[string]string) (err e
 
 	err = sess.Save(r, w)
 
-	//fmt.Println(">>> LOGIN:", sess.Options, sess.Values)
-	// Repost user logged in: err, url, params, session, stack
-	sess, _ = _cookieStore.Get(r, _cookieSessName)
-	_onPanic(
-		fmt.Sprintf("User logged in"),
-		fmt.Sprintf("%v #%v @ %v", sess.Values["initials"], sess.Values["_auth"], sess.Values["_ip"]),
-		"Session", fmt.Sprint(sess))
+	fmt.Println(">>> LOGIN:", sess.Options, sess.Values)
+	/*
+		// Report user logged in: err, url, params, session, stack
+		sess, _ = _cookieStore.Get(r, _cookieSessName)
+		_onPanic(
+			fmt.Sprintf("User logged in"),
+			fmt.Sprintf("%v #%v @ %v", sess.Values["initials"], sess.Values["_auth"], sess.Values["_ip"]),
+			"Session", fmt.Sprint(sess))
+	*/
 
 	return
 }
