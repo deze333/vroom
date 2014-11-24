@@ -98,7 +98,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *reqres.WebSocket_Rou
 		ws.conn.Close()
 	}()
 
-	fmt.Printf("++++ WebSocket %p opened\n", ws.conn)
+	//fmt.Printf("++++ WebSocket %p opened\n", ws.conn)
 
 	// Start async processors
 	go proc(ws)
@@ -121,7 +121,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *reqres.WebSocket_Rou
 		// Text message
 		case websocket.TextMessage:
 
-			fmt.Println("O__________")
+			//fmt.Println("O__________")
 			// XXX TEMP TESTING FOR NEWER PROC
 			// Choose processing logic depending on user type
 
@@ -136,7 +136,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *reqres.WebSocket_Rou
 					ws.chanIn <- msg
 				}
 			}
-			fmt.Println("__________X")
+			//fmt.Println("__________X")
 
 		// Binary not supported
 		case websocket.BinaryMessage:

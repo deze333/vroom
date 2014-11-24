@@ -1,7 +1,6 @@
 package api_ws
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -42,7 +41,7 @@ func procChanIn() {
 	var conn *Conn
 	for msg := range _chanIn {
 		msg.isProcessed = false
-		fmt.Printf("chan IN ---> %v = %v\n", msg.agentId, string(msg.req))
+		//fmt.Printf("chan IN ---> %v = %v\n", msg.agentId, string(msg.req))
 
 		// Attempt to get active connection
 		if conn = GetConn(msg.isAuthd, msg.agentId); conn == nil {
@@ -61,7 +60,7 @@ func procChanIn() {
 func procChanOut() {
 	var conn *Conn
 	for msg := range _chanOut {
-		fmt.Printf("chan OUT <--- %v\n", string(msg.res))
+		//fmt.Printf("chan OUT <--- %v\n", string(msg.res))
 
 		// Attempt to get active connection
 		if conn = GetConn(msg.isAuthd, msg.agentId); conn == nil {
@@ -84,7 +83,7 @@ func procChanOut() {
 // Sends broadcast messages to all active connections.
 func procChanBroadcast() {
 	for msg := range _chanBroadcast {
-		fmt.Printf("chan BROADCAST <--- %v\n", string(msg.res))
+		//fmt.Printf("chan BROADCAST <--- %v\n", string(msg.res))
 
 		// Apply broadcaster function to each connection
 		if msg.isAuthd {
