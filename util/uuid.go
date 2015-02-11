@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os/exec"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -45,5 +46,5 @@ func NewUUID() string {
 		t := time.Now()
 		return fmt.Sprintf("%s", t.UnixNano())
 	}
-	return fmt.Sprintf("%s", out)
+	return strings.Trim(fmt.Sprintf("%s", out), "\n")
 }
