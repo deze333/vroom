@@ -28,15 +28,28 @@ func Handle(w http.ResponseWriter, r *http.Request, fn func(*reqres.Req) (interf
 
 	w.Header().Set("Content-Type", "application/json")
 
-	// Parse request data
-	req, err := ParseReq(w, r)
+	var req *reqres.Req
 
-	// On parse error
+	// Check if there is a file in a request.
+	// If so - do not parse request as JSON.
+	_, _, err := r.FormFile("file")
 	if err != nil {
-		res := NewResponse_Err(req, errors.New_AppErr(err,
-			"Error parsing request data as JSON"))
-		w.Write(res)
-		return
+		// Parse request data
+		req, err = ParseReq(w, r)
+
+		// On parse error
+		if err != nil {
+			res := NewResponse_Err(req, errors.New_AppErr(err,
+				"Error parsing request data as JSON"))
+			w.Write(res)
+			return
+		}
+	} else {
+		// Dummy wrapper for consistency.
+		req = &reqres.Req{
+			HttpReq:       r,
+			HttpResWriter: w,
+		}
 	}
 
 	// Catch panic
