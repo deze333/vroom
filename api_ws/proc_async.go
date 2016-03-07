@@ -112,7 +112,7 @@ func broadcaster(conn *Conn, msg *Message) {
 
 			// Report panic: err, url, params, stack
 			_onPanic(
-				fmt.Sprintf("Error writing to web socket: %v", err),
+				fmt.Sprintf("Error writing to WebSocket: %v", err),
 				"Stack", util.Stack())
 		}
 	}()
