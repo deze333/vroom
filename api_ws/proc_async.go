@@ -1,9 +1,11 @@
 package api_ws
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
+	"github.com/deze333/vroom/util"
 	"github.com/gorilla/websocket"
 )
 
@@ -103,6 +105,18 @@ func procChanBroadcast() {
 // Broadcasts message to single connection.
 // Closes connection on error.
 func broadcaster(conn *Conn, msg *Message) {
+
+	// Catch panic
+	defer func() {
+		if err := recover(); err != nil {
+
+			// Report panic: err, url, params, stack
+			_onPanic(
+				fmt.Sprintf("Error writing to web socket: %v", err),
+				"Stack", util.Stack())
+		}
+	}()
+
 	err := conn.conn.WriteMessage(websocket.TextMessage, msg.res)
 	if err != nil {
 		// Close connection on write error
