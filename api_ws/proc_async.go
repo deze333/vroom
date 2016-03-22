@@ -1,11 +1,9 @@
 package api_ws
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
-	"github.com/deze333/vroom/util"
 	"github.com/gorilla/websocket"
 )
 
@@ -110,10 +108,13 @@ func broadcaster(conn *Conn, msg *Message) {
 	defer func() {
 		if err := recover(); err != nil {
 
+			// Do nothing
 			// Report panic: err, url, params, stack
-			_onPanic(
-				fmt.Sprintf("Error writing to WebSocket: %v", err),
-				"Stack", util.Stack())
+			/*
+				_onPanic(
+					fmt.Sprintf("Error writing to WebSocket: %v", err),
+					"Stack", util.Stack())
+			*/
 		}
 	}()
 
