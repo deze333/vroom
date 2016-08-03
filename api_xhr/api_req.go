@@ -54,6 +54,7 @@ func decodeAsUnencodedReq(r *http.Request) (params map[string]interface{}, err e
 func decodeAsGzipReq(r *http.Request) (params map[string]interface{}, err error) {
 
 	fmt.Println("=== DECODE REQUEST AS GZIP ===")
+	fmt.Println(r)
 	fmt.Println("=== Request body reader:", r.Body)
 
 	var reader *gzip.Reader
