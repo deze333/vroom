@@ -16,7 +16,12 @@ func NewResponse(req *reqres.Req, data interface{}) []byte {
 		Data: data,
 	}
 
-	return res.Marshal(req)
+	switch req.ResponseMarshalingMode {
+	case "DataOnly":
+		return res.MarshalDataOnly(req)
+	default:
+		return res.Marshal(req)
+	}
 }
 
 // Creates new JSON error response, prefab types.
@@ -26,5 +31,10 @@ func NewResponse_Err(req *reqres.Req, err *errors.ResError) []byte {
 		Err: err,
 	}
 
-	return res.Marshal(req)
+	switch req.ResponseMarshalingMode {
+	case "DataOnly":
+		return res.MarshalDataOnly(req)
+	default:
+		return res.Marshal(req)
+	}
 }
