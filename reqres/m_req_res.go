@@ -107,17 +107,15 @@ func (r *Res) Marshal(req *Req) []byte {
 // Use for external integrations that don't need our response data structure.
 func (r *Res) MarshalDataOnly(req *Req) []byte {
 
-	fmt.Println("Marshal data only =====", r.Data)
-
 	if r.Data == nil {
-		return []byte{}
+		return []byte("{}")
 	}
 
 	// Check if that's an empty map to prevent
 	// return that will say "null"
 	if data, ok := r.Data.(map[string]interface{}); ok {
 		if len(data) == 0 {
-			return []byte{}
+			return []byte("{}")
 		}
 	}
 
@@ -125,7 +123,6 @@ func (r *Res) MarshalDataOnly(req *Req) []byte {
 	jsonb, err := json.Marshal(r.Data)
 	if err == nil {
 		//return postEncode(jsonb)
-		fmt.Println("Marshal data only =====", jsonb)
 		return jsonb
 	}
 
