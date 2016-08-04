@@ -107,12 +107,14 @@ func (r *Res) Marshal(req *Req) []byte {
 // Use for external integrations that don't need our response data structure.
 func (r *Res) MarshalDataOnly(req *Req) []byte {
 
+	// Next two ifs ensure that we at least return "{}"
+	// which is a valid JSON object,
+	// otherwise some clients may throw exception
+	// (notably Java)
 	if r.Data == nil {
 		return []byte("{}")
 	}
 
-	// Check if that's an empty map to prevent
-	// return that will say "null"
 	if data, ok := r.Data.(map[string]interface{}); ok {
 		if len(data) == 0 {
 			return []byte("{}")
