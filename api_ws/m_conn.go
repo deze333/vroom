@@ -2,6 +2,7 @@ package api_ws
 
 import (
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/deze333/vroom/reqres"
@@ -16,6 +17,7 @@ type Conn struct {
 	w    http.ResponseWriter
 	r    *http.Request
 	conn *websocket.Conn
+	m    sync.Mutex
 
 	router *reqres.WebSocket_Router
 

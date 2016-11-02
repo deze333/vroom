@@ -69,7 +69,9 @@ func procChanOut() {
 		}
 
 		// Write response
+		conn.m.Lock()
 		err := conn.conn.WriteMessage(websocket.TextMessage, msg.res)
+		conn.m.Unlock()
 		if err != nil {
 			// Close connection on write error
 			_chanFailed <- msg
@@ -118,7 +120,9 @@ func broadcaster(conn *Conn, msg *Message) {
 		}
 	}()
 
+	conn.m.Lock()
 	err := conn.conn.WriteMessage(websocket.TextMessage, msg.res)
+	conn.m.Unlock()
 	if err != nil {
 		// Close connection on write error
 		_chanFailed <- msg
