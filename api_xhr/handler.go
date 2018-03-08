@@ -19,7 +19,13 @@ func Handle_NotAuthd(w http.ResponseWriter, r *http.Request) {
 	// Error 401, Unathorized
 	w.WriteHeader(http.StatusUnauthorized)
 
-	res := NewResponse_Err(nil, errors.New_NotAuthd())
+	// Dummy wrapper for consistency
+	req := &reqres.Req{
+		HttpReq:       r,
+		HttpResWriter: w,
+	}
+
+	res := NewResponse_Err(req, errors.New_NotAuthd())
 	w.Write(res)
 }
 
