@@ -42,7 +42,7 @@ func RegisterConn(ws *Conn) {
 			}
 
 			// Debug
-			fmt.Println(DumpConnsAuthd("REGISTERED CONNS: AUTHD"))
+			//fmt.Println(DumpConnsAuthd("REGISTERED CONNS: AUTHD"))
 
 		} else {
 
@@ -58,7 +58,7 @@ func RegisterConn(ws *Conn) {
 		_connsPublic[ws.agentId] = ws
 
 		// Debug
-		fmt.Println(DumpConnsPublic("REGISTERED CONNS: PUBLIC"))
+		//fmt.Println(DumpConnsPublic("REGISTERED CONNS: PUBLIC"))
 	}
 }
 
@@ -71,14 +71,14 @@ func DeregisterConn(ws *Conn) {
 		}
 
 		// Debug
-		fmt.Println(DumpConnsAuthd("REGISTERED CONNS: AUTHD"))
+		//fmt.Println(DumpConnsAuthd("REGISTERED CONNS: AUTHD"))
 
 	} else {
 		// Public connections
 		delete(_connsPublic, ws.agentId)
 
 		// Debug
-		fmt.Println(DumpConnsPublic("REGISTERED CONNS: PUBLIC"))
+		//fmt.Println(DumpConnsPublic("REGISTERED CONNS: PUBLIC"))
 	}
 }
 
@@ -121,7 +121,7 @@ func CloseAuthdConn(id string) {
 
 		// Multiple connections may share same authentication ID
 		for _, ws := range conns {
-			fmt.Printf("__X Closed WebSocket ID = %v, conn = %p\n", id, ws.conn)
+			//fmt.Printf("__X Closed WebSocket ID = %v, conn = %p\n", id, ws.conn)
 			ws.conn.Close()
 		}
 
