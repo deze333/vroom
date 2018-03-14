@@ -31,7 +31,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *reqres.WebSocket_Rou
 		CheckOrigin: func(r *http.Request) bool {
 			r.ParseForm()
 
-			fmt.Printf("\n\n-------------------------------\nCheck WebSocket call: \nURL = %v \nOrigin = %v\nCaller ID = %v\n---------------------------------------\n\n", r.URL, r.Header["Origin"], r.Form["id"])
+			//fmt.Printf("\n\n-------------------------------\nCheck WebSocket call: \nURL = %v \nOrigin = %v\nCaller ID = %v\n---------------------------------------\n\n", r.URL, r.Header["Origin"], r.Form["id"])
 
 			// Check that ID is present
 			if ids, ok := r.Form["id"]; ok {
@@ -158,7 +158,7 @@ func Handle(w http.ResponseWriter, r *http.Request, router *reqres.WebSocket_Rou
 	// Signal procs to finish
 	ws.chanProcClose <- 1
 	ws.chanProcWriterClose <- 1
-	fmt.Printf("---X WebSocket %p closed\n", ws.conn)
+	//fmt.Printf("---X WebSocket %p closed\n", ws.conn)
 }
 
 // Processes incoming channel data.
@@ -171,7 +171,7 @@ func proc(ws *Conn) {
 
 		case <-ws.chanProcClose:
 			// Exit
-			fmt.Println("---X_R proc finished")
+			//fmt.Println("---X_R proc finished")
 			return
 		}
 	}
@@ -194,7 +194,7 @@ func procWriter(ws *Conn) {
 
 		case <-ws.chanProcWriterClose:
 			// Exit
-			fmt.Println("---X_W procWriter finished")
+			//fmt.Println("---X_W procWriter finished")
 			return
 		}
 	}

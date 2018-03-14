@@ -1,7 +1,6 @@
 package api_ws
 
 import (
-	"fmt"
 )
 
 //------------------------------------------------------------
@@ -21,7 +20,7 @@ func GetBroadcaster_Authd() func(string, interface{}) (err error) {
 // Broadcasts to open public websocket connections.
 func broadcastPublic(op string, data interface{}) (err error) {
 
-	fmt.Println(DumpConnsPublic("BROADCAST PUBLIC"))
+	//fmt.Println(DumpConnsPublic("BROADCAST PUBLIC"))
 
 	/* OLD STYLE:
 	for _, ws := range _connsPublic {
@@ -41,7 +40,7 @@ func broadcastPublic(op string, data interface{}) (err error) {
 // Broadcasts to open authenticated websocket connections.
 func broadcastAuthd(op string, data interface{}) (err error) {
 
-	fmt.Println(DumpConnsAuthd("BROADCAST AUTHD"))
+	//fmt.Println(DumpConnsAuthd("BROADCAST AUTHD"))
 
 	/* OLD STYLE:
 	for _, conns := range _connsAuthd {
